@@ -20,7 +20,7 @@
 		ranges;
 
 		framebuffer0: framebuffer@fa000000 {
-			compatible = "simple-framebuffer";
+			compatible = "simple-framebuffer", "framebuffer-serial";
 			reg = <0x0 0xfa000000 (720 * 1600 * 4)>;
 			width = <720>;
 			height = <1600>;
