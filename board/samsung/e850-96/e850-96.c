@@ -235,6 +235,5 @@ int power_init_board(void)
 int board_init(void)
 {
 	*(int*) (DECON_F_BASE + HW_SW_TRIG_CONTROL) = 0x1281;
-	memset((void*)0xfa000000, 0xFF, (720 * 1600 * 4));
 	return 0;
 }

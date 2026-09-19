@@ -16,6 +16,9 @@
 #define SCREEN_WIDTH 720
 #define SCREEN_HEIGHT 1600
 
+#define DECON_F_BASE        0x13060000
+#define HW_SW_TRIG_CONTROL  0x70
+
 DECLARE_GLOBAL_DATA_PTR;
 
 struct framebuffer_serial_data {
@@ -151,6 +154,7 @@ static struct udevice init_dev = {
 
 static inline void _debug_uart_init(void)
 {
+	*(int*) (DECON_F_BASE + HW_SW_TRIG_CONTROL) = 0x1281;
     clear_fb(&init_dev);
 }
 

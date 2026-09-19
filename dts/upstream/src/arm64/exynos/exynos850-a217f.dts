@@ -19,6 +19,8 @@
 		#size-cells = <1>;
 		ranges;
 
+		stdout-path=&framebuffer0;
+
 		framebuffer0: framebuffer@fa000000 {
 			compatible = "simple-framebuffer", "framebuffer-serial";
 			reg = <0x0 0xfa000000 (720 * 1600 * 4)>;
