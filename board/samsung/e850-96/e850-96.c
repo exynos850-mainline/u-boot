@@ -207,6 +207,7 @@ int board_late_init(void)
 	setup_serial();
 	setup_ethaddr();
 
+/*
 	if (bootdev_is_usb())
 		load_firmware_usb();
 	else
@@ -217,7 +218,7 @@ int board_late_init(void)
 			"dfu 0 mmc 0");
 		env_set("bootdelay", "0");
 	}
-
+*/
 	return 0;
 }
 
