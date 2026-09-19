@@ -36,6 +36,9 @@
 #define LDFW_MAX_SIZE			SZ_4M
 #define SP_MAX_SIZE			SZ_1M
 
+#define DECON_F_BASE        0x13060000
+#define HW_SW_TRIG_CONTROL  0x70
+
 struct efi_fw_image fw_images[] = {
 	{
 		.image_type_id = E850_96_FWBL1_IMAGE_GUID,
@@ -226,5 +229,12 @@ int power_init_board(void)
 	if (err)
 		printf("ERROR: Failed to configure PMIC (%d)\n", err);
 
+	return 0;
+}
+
+int board_init(void)
+{
+	*(int*) (DECON_F_BASE + HW_SW_TRIG_CONTROL) = 0x1281;
+	memset((void*)0xfa000000, 0xFF, (720 * 1600 * 4));
 	return 0;
 }
