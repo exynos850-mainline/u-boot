@@ -1,0 +1,248 @@
+// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+/*
+ * Samsung Galaxy A13 (SM-A135F) common device tree source
+ *
+ * Copyright (c) 2026, schoosh212 <superaviation001@gmail.com>
+ */
+
+/dts-v1/;
+#include "exynos850.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	model = "Samsung Galaxy A13";
+	compatible = "samsung,a135f", "samsung,exynos850";
+
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		bootargs = "clk_ignore_unused pd_ignore_unused regulator_ignore_unused";
+
+		framebuffer@fa000000 {
+			compatible = "simple-framebuffer", "framebuffer-serial";
+			reg = <0 0xfa000000 0 (1080 * 2408 * 4)>;
+			width = <1080>;
+			height = <2408>;
+			stride = <(1080 * 4)>;
+			format = "a8r8g8b8";
+			clocks = <&cmu_dpu CLK_GOUT_DPU_DECON0_ACLK>,
+				 <&cmu_dpu CLK_GOUT_DPU_DMA_ACLK>,
+				 <&cmu_dpu CLK_GOUT_DPU_DPP_ACLK>,
+				 <&cmu_dpu CLK_GOUT_DPU_PPMU_ACLK>,
+				 <&cmu_dpu CLK_GOUT_DPU_PPMU_PCLK>,
+				 <&cmu_dpu CLK_GOUT_DPU_SMMU_CLK>;
+		};
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x3c900000>,
+		      /* Memory hole */
+		      <0x0 0xc0000000 0x0 0x20000000>,
+		      /* Memory hole */
+		      <0x0 0xe0d00000 0x0 0x1f300000>,
+		      /* Memory hole - last block */
+		      <0x8 0x80000000 0x0 0x80000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		ramoops@f0f10000 {
+			compatible = "ramoops";
+			reg = <0 0xf0f10000 0 0x8000>;
+			record-size = <0x2000>;
+			console-size = <0x4000>;
+			ftrace-size = <0>;
+			pmsg-size = <0x2000>;
+		};
+
+		cont_splash_mem: framebuffer@fa000000 {
+			reg = <0 0xfa000000 0 (1080 * 2408 * 4)>;
+			no-map;
+		};
+
+		abox_reserved: audio@e9400000 {
+			reg = <0 0xe9400000 0 0x400000>;
+			no-map;
+		};
+
+	};
+
+	rtcclk: clock-rtcclk {
+		compatible = "fixed-clock";
+		clock-output-names = "rtcclk";
+		#clock-cells = <0>;
+		clock-frequency = <32768>;
+	};
+
+	/* TODO: Remove this once PMIC is implemented  */
+	reg_dummy: regulator-0 {
+		compatible = "regulator-fixed";
+		regulator-name = "dummy_reg";
+	};
+
+	reg_mali: regulator-1 {
+		compatible = "regulator-fixed";
+		regulator-name = "mali";
+		regulator-min-microvolt = <1150000>;
+		regulator-max-microvolt = <1150000>;
+	};
+
+        reg_lcd_vddi: regulator-2 {
+                compatible = "regulator-fixed";
+                regulator-name = "lcd_vddi";
+                regulator-min-microvolt = <1800000>;
+                regulator-max-microvolt = <1800000>;
+        };
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&key_voldown &key_volup>;
+		pinctrl-names = "default";
+
+		voldown-key {
+			label = "Volume Down";
+			linux,code = <KEY_VOLUMEDOWN>;
+			gpios = <&gpa1 0 GPIO_ACTIVE_LOW>;
+			wakeup-source;
+		};
+
+		volup-key {
+			label = "Volume Up";
+			linux,code = <KEY_VOLUMEUP>;
+			gpios = <&gpa0 7 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+&oscclk {
+	clock-frequency = <26000000>;
+};
+
+&timer {
+	clock-frequency = <26000000>;
+};
+
+&rtc {
+	status = "disabled";
+	clocks = <&cmu_apm CLK_GOUT_RTC_PCLK>, <&rtcclk>;
+	clock-names = "rtc", "rtc_src";
+};
+
+&pinctrl_alive {
+	key_voldown: key-voldown-pins {
+		samsung,pins = "gpa1-0";
+		samsung,pin-function = <EXYNOS_PIN_FUNC_EINT>;
+		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
+	};
+
+	key_volup: key-volup-pins {
+		samsung,pins = "gpa0-7";
+		samsung,pin-function = <EXYNOS_PIN_FUNC_EINT>;
+		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+		samsung,pin-drv = <EXYNOS5420_PIN_DRV_LV1>;
+	};
+};
+
+&cmu_hsi {
+	clocks = <&oscclk>, <&rtcclk>,
+		 <&cmu_top CLK_DOUT_HSI_BUS>,
+		 <&cmu_top CLK_DOUT_HSI_MMC_CARD>,
+		 <&cmu_top CLK_DOUT_HSI_USB20DRD>;
+	clock-names = "oscclk", "rtcclk", "dout_hsi_bus",
+		      "dout_hsi_mmc_card", "dout_hsi_usb20drd";
+};
+
+&mmc_0 {
+	status = "okay";
+	compatible = "samsung,exynos7-dw-mshc";
+	mmc-ddr-1_8v;
+	mmc-hs200-1_8v;
+	mmc-hs400-1_8v;
+	cap-mmc-highspeed;
+	non-removable;
+	mmc-hs400-enhanced-strobe;
+	card-detect-delay = <200>;
+	clock-frequency = <800000000>;
+	bus-width = <8>;
+	samsung,dw-mshc-ciu-div = <3>;
+	samsung,dw-mshc-sdr-timing = <0 4>;
+	samsung,dw-mshc-ddr-timing = <2 4>;
+	samsung,dw-mshc-hs400-timing = <0 2>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&sd0_clk_pins &sd0_cmd_pins &sd0_rdqs_pins &sd0_nreset_pins
+		     &sd0_bus1_pins &sd0_bus4_pins &sd0_bus8_pins>;
+};
+
+&usbdrd {
+        status = "okay";
+        /delete-property/ extcon;
+        /delete-property/ pinctrl-names;
+        /delete-property/ pinctrl-0;
+        vdd10-supply = <&reg_dummy>;
+        vdd33-supply = <&reg_dummy>;
+};
+
+&usbdrd_dwc3 {
+        status = "okay";
+        dr_mode = "peripheral";
+        maximum-speed = "high-speed";
+        /delete-property/ extcon;
+        phys = <&usbdrd_phy 0>;
+        phy-names = "usb2-phy";
+};
+
+&usbdrd_phy {
+        status = "okay";
+        /delete-property/ extcon;
+        /delete-property/ pinctrl-names;
+        /delete-property/ pinctrl-0;
+        vdd-supply = <&reg_dummy>;
+        vbus-supply = <&reg_dummy>;
+};
+
+&gpu {
+	mali-supply = <&reg_mali>;
+	status = "okay";
+};
+
+&usi_cmgp0 {
+	samsung,mode = <USI_MODE_SPI>;
+	status = "okay";
+};
+
+&spi_1 {
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	num-cs = <1>;
+	cs-gpios = <&gpm3 0 GPIO_ACTIVE_LOW>;
+
+	touchscreen@0 {
+		compatible = "ovt,td4150";
+		reg = <0>;
+		spi-max-frequency = <7000000>;
+		spi-cpol;
+		spi-cpha;
+
+		interrupt-parent = <&gpa0>;
+		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+
+		vdd-supply = <&reg_lcd_vddi>;
+	};
+};

@@ -13,8 +13,8 @@
 #include <errno.h>
 #include "font.h"
 
-#define SCREEN_WIDTH 720
-#define SCREEN_HEIGHT 1600
+#define SCREEN_WIDTH 1080
+#define SCREEN_HEIGHT 2408
 
 #define DECON_F_BASE        0x13060000
 #define HW_SW_TRIG_CONTROL  0x70
@@ -138,7 +138,7 @@ U_BOOT_DRIVER(serial_framebuffer) = {
 	.ops = &framebuffer_serial_ops,
 };
 
-#ifdef CONFIG_DEBUG_UART_FRAMEBUFFER
+//#ifdef CONFIG_DEBUG_UART_FRAMEBUFFER
 
 static struct framebuffer_serial_data init_serial_data = {
 	.base = CONFIG_VAL(DEBUG_UART_BASE),
@@ -154,7 +154,7 @@ static struct udevice init_dev = {
 
 static inline void _debug_uart_init(void)
 {
-	*(int*) (DECON_F_BASE + HW_SW_TRIG_CONTROL) = 0x1281;
+    *(int*) (DECON_F_BASE + HW_SW_TRIG_CONTROL) = 0x1281;
     clear_fb(&init_dev);
 }
 
@@ -165,4 +165,4 @@ static inline void _debug_uart_putc(int ch)
 
 DEBUG_UART_FUNCS
 
-#endif
+//#endif
